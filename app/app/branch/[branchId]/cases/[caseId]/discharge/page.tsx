@@ -13,11 +13,13 @@ export default async function DischargePage({
   const { branchId, caseId } = await params
   const supabase = await createClient()
 
-  const { data: caseDetails } = await supabase
+  const { data } = await supabase
     .from("deceased_cases")
     .select("*")
     .eq("id", caseId)
     .single()
+
+  const caseDetails = data
 
   const { data: charges } = await supabase
     .from("case_charges")
