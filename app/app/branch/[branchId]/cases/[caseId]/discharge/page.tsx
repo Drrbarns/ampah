@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Database } from "@/lib/supabase/database.types"
 
 export default async function DischargePage({
   params,
@@ -19,7 +20,7 @@ export default async function DischargePage({
     .eq("id", caseId)
     .single()
 
-  const caseDetails = data
+  const caseDetails = data as Database['public']['Tables']['deceased_cases']['Row'] | null
 
   const { data: charges } = await supabase
     .from("case_charges")
