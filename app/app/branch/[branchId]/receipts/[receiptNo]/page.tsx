@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { formatCurrency, formatDateTime } from "@/lib/utils"
+import { PrintButton } from "@/components/ui/print-button"
 
 export default async function ReceiptPage({
   params,
@@ -36,8 +37,6 @@ export default async function ReceiptPage({
   const deceased = payment ? payment.deceased_cases : dischargeCase
   const type = payment ? "PAYMENT RECEIPT" : "DISCHARGE CLEARANCE"
   const date = payment ? payment.paid_on : dischargeCase.discharge_date
-
-  import { PrintButton } from "@/components/ui/print-button"
 
   return (
     <div className="p-8 max-w-[800px] mx-auto font-serif text-black bg-white min-h-screen">
