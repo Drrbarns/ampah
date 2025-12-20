@@ -2,30 +2,30 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
+import { UserActionCell } from "./user-action-cell"
 
-export type Branch = {
+export type Profile = {
     id: string
-    name: string
-    code: string
-    address: string | null
+    full_name: string
+    role: string
     phone: string | null
     is_active: boolean
+    email?: string
 }
 
-import { BranchActionCell } from "./branch-action-cell"
-
-export const columns: ColumnDef<Branch>[] = [
+export const columns: ColumnDef<Profile>[] = [
   {
-    accessorKey: "code",
-    header: "Code",
-  },
-  {
-    accessorKey: "name",
+    accessorKey: "full_name",
     header: "Name",
   },
   {
-    accessorKey: "address",
-    header: "Address",
+    accessorKey: "role",
+    header: "Role",
+    cell: ({ row }) => (
+        <Badge variant="outline" className="capitalize">
+            {row.getValue("role")?.toString().replace('_', ' ')}
+        </Badge>
+    )
   },
   {
     accessorKey: "phone",
@@ -42,7 +42,7 @@ export const columns: ColumnDef<Branch>[] = [
   },
   {
       id: "actions",
-      cell: ({ row }) => <BranchActionCell branch={row.original} />
+      cell: ({ row }) => <UserActionCell user={row.original} />
   }
 ]
 

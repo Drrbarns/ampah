@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataTable } from "@/components/ui/data-table"
-import { CreateBranchDialog } from "./branch-dialog"
+import { BranchDialog } from "./branch-dialog"
 import { columns } from "./columns"
 
 export default async function BranchesPage() {
@@ -16,7 +16,7 @@ export default async function BranchesPage() {
     <div className="flex-1 space-y-4">
        <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Branches</h2>
-        <CreateBranchDialog />
+        <BranchDialog />
       </div>
 
       <Card>
