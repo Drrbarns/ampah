@@ -7,6 +7,9 @@ import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils"
 import Link from "next/link"
 import { ArrowLeft, Wallet, LogOut, Printer, Edit } from "lucide-react"
 
+import { AddChargeDialog } from "./charge-dialog"
+import { ChargeDeleteButton } from "./charge-delete-button"
+
 export default async function CaseDetailsPage({
   params,
 }: {
@@ -133,18 +136,22 @@ export default async function CaseDetailsPage({
             </Card>
 
              <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Timeline & Charges</CardTitle>
+                    <AddChargeDialog caseId={caseId} branchId={branchId} />
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
                         {charges?.map((charge) => (
-                            <div key={charge.id} className="flex items-center justify-between border-b pb-2 last:border-0">
+                            <div key={charge.id} className="flex items-center justify-between border-b pb-2 last:border-0 group">
                                 <div>
                                     <div className="font-medium">{charge.description}</div>
                                     <div className="text-xs text-muted-foreground">{formatDate(charge.applied_on)}</div>
                                 </div>
-                                <div className="font-medium">{formatCurrency(charge.amount || 0)}</div>
+                                <div className="flex items-center space-x-4">
+                                    <div className="font-medium">{formatCurrency(charge.amount || 0)}</div>
+                                    <ChargeDeleteButton chargeId={charge.id} caseId={caseId} branchId={branchId} />
+                                </div>
                             </div>
                         ))}
                          <div className="flex items-center justify-between pt-4">
