@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import { Overview } from "@/components/dashboard/overview" // To implement
 import { RecentSales } from "@/components/dashboard/recent-sales" // To implement
