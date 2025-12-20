@@ -7,3 +7,9 @@ export async function POST(request: Request) {
   return redirect('/auth/login');
 }
 
+export async function GET(request: Request) {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  return redirect('/auth/login');
+}
+
