@@ -9,19 +9,12 @@ import { useRouter } from "next/navigation"
 
 export function BranchNav({
   className,
+  branchId,
   ...props
-}: React.HTMLAttributes<HTMLElement>) {
+}: React.HTMLAttributes<HTMLElement> & { branchId: string }) {
   const pathname = usePathname()
-  const params = useParams()
   const router = useRouter()
   const supabase = createClient()
-  const branchId = params.branchId as string
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/auth/login")
-    router.refresh()
-  }
 
   return (
     <nav
@@ -83,9 +76,6 @@ export function BranchNav({
       >
         Settings
       </Link>
-      <Button variant="ghost" onClick={handleSignOut} className="ml-auto">
-        Sign Out
-      </Button>
     </nav>
   )
 }

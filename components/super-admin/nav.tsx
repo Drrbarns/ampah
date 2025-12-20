@@ -81,9 +81,6 @@ export function SuperAdminNav({
       >
         Audit Logs
       </Link>
-      <Button variant="ghost" onClick={handleSignOut} className="ml-auto">
-        Sign Out
-      </Button>
     </nav>
   )
 }
