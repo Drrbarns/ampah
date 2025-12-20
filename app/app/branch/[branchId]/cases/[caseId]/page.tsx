@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils"
 import Link from "next/link"
-import { ArrowLeft, Wallet, LogOut, Printer } from "lucide-react"
+import { ArrowLeft, Wallet, LogOut, Printer, Edit } from "lucide-react"
 
 export default async function CaseDetailsPage({
   params,
@@ -55,6 +55,11 @@ export default async function CaseDetailsPage({
             </Badge>
         </div>
         <div className="flex items-center space-x-2">
+            <Link href={`/app/branch/${branchId}/cases/${caseId}/edit`}>
+                <Button variant="outline" size="icon">
+                    <Edit className="h-4 w-4" />
+                </Button>
+            </Link>
             <Link href={`/app/branch/${branchId}/payments?caseId=${caseId}`}>
                 <Button variant="outline">
                     <Wallet className="mr-2 h-4 w-4" />

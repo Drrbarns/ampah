@@ -47,10 +47,11 @@ type CaseFormValues = z.infer<typeof caseFormSchema>
 
 interface CaseFormProps {
   branchId: string
-  initialData?: CaseFormValues
+  initialData?: any // Using any for simplicity with partial types
+  isEdit?: boolean
 }
 
-export function CaseForm({ branchId, initialData }: CaseFormProps) {
+export function CaseForm({ branchId, initialData, isEdit = false }: CaseFormProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
@@ -79,35 +80,49 @@ export function CaseForm({ branchId, initialData }: CaseFormProps) {
   async function onSubmit(data: CaseFormValues) {
     setLoading(true)
     try {
-      // Create the case
-      const { data: newCase, error } = await supabase
-        .from("deceased_cases")
-        .insert({
-          branch_id: branchId,
-          ...data,
-          status: "IN_CUSTODY",
-        })
-        .select()
-        .single()
+      if (isEdit && initialData?.id) {
+          // Update Mode
+          const { error } = await supabase
+            .from("deceased_cases")
+            .update({
+                ...data,
+                // Ensure branch_id is not changed or is valid
+            })
+            .eq("id", initialData.id)
+            .eq("branch_id", branchId) // Security check
 
-      if (error) {
-        if (error.code === '23505') {
-            throw new Error("Tag number already exists.")
-        }
-        throw error
+          if (error) throw error
+
+          toast({
+            title: "Success",
+            description: "Case updated successfully.",
+          })
+      } else {
+          // Create Mode
+          const { data: newCase, error } = await supabase
+            .from("deceased_cases")
+            .insert({
+              branch_id: branchId,
+              ...data,
+              status: "IN_CUSTODY",
+            })
+            .select()
+            .single()
+
+          if (error) {
+            if (error.code === '23505') {
+                throw new Error("Tag number already exists.")
+            }
+            throw error
+          }
+          
+          router.push(`/app/branch/${branchId}/cases/${newCase.id}`)
       }
 
-      // Add default charges based on type (example logic)
-      // In a real app, you might select services from a list here
-      // For now, let's just create the case
-
-      toast({
-        title: "Success",
-        description: "Case created successfully.",
-      })
-      
-      router.push(`/app/branch/${branchId}/cases/${newCase.id}`)
       router.refresh()
+      if (isEdit) {
+          router.push(`/app/branch/${branchId}/cases/${initialData.id}`)
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -322,7 +337,7 @@ export function CaseForm({ branchId, initialData }: CaseFormProps) {
         </div>
         <Button type="submit" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Admission
+          {isEdit ? "Update Case" : "Save Admission"}
         </Button>
       </form>
     </Form>

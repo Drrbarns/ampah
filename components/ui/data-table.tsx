@@ -11,6 +11,8 @@ import {
   getSortedRowModel,
   ColumnFiltersState,
   getFilteredRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
 } from "@tanstack/react-table"
 
 import {
@@ -23,17 +25,24 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DataTableFacetedFilter } from "@/components/ui/data-table-faceted-filter"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   searchKey?: string
+  facetedFilters?: {
+    column: string
+    title: string
+    options: { label: string; value: string }[]
+  }[]
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
+  facetedFilters,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -49,6 +58,8 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
       sorting,
       columnFilters,
@@ -57,7 +68,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 gap-2">
         {searchKey && (
           <Input
             placeholder="Search..."
@@ -68,6 +79,16 @@ export function DataTable<TData, TValue>({
             className="max-w-sm"
           />
         )}
+        {facetedFilters?.map((filter) => (
+            table.getColumn(filter.column) && (
+                <DataTableFacetedFilter
+                    key={filter.column}
+                    column={table.getColumn(filter.column)}
+                    title={filter.title}
+                    options={filter.options}
+                />
+            )
+        ))}
       </div>
       <div className="rounded-md border">
         <Table>
@@ -140,5 +161,3 @@ export function DataTable<TData, TValue>({
     </div>
   )
 }
-
-

@@ -2,49 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { PaymentForm } from "@/components/payments/payment-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataTable } from "@/components/ui/data-table"
-import { ColumnDef } from "@tanstack/react-table"
-import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils"
-import { Database } from "@/lib/supabase/database.types"
-
-type Payment = Database["public"]["Tables"]["payments"]["Row"] & {
-    deceased_cases: {
-        name_of_deceased: string
-        tag_no: string
-    } | null
-}
-
-const columns: ColumnDef<Payment>[] = [
-  {
-    accessorKey: "receipt_no",
-    header: "Receipt No",
-  },
-  {
-    accessorKey: "paid_on",
-    header: "Date",
-    cell: ({ row }) => formatDateTime(row.getValue("paid_on")),
-  },
-  {
-    accessorFn: (row) => row.deceased_cases?.tag_no,
-    header: "Tag No",
-  },
-  {
-    accessorFn: (row) => row.deceased_cases?.name_of_deceased,
-    header: "Payer/Deceased",
-  },
-  {
-    accessorKey: "amount",
-    header: "Amount",
-    cell: ({ row }) => formatCurrency(row.getValue("amount")),
-  },
-  {
-    accessorKey: "method",
-    header: "Method",
-  },
-  {
-    accessorKey: "allocation",
-    header: "Allocation",
-  },
-]
+import { columns } from "./columns"
 
 export default async function PaymentsPage({
   params,
