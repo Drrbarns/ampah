@@ -1,6 +1,7 @@
 import { BranchNav } from "@/components/branch/nav"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { Breadcrumbs } from "@/components/breadcrumbs"
 
 export default async function BranchLayout({
   children,
@@ -45,6 +46,7 @@ export default async function BranchLayout({
         </div>
       </div>
       <div className="flex-1 space-y-4 p-8 pt-6">
+        <Breadcrumbs />
         {children}
       </div>
     </div>
