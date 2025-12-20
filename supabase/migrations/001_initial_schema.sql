@@ -65,12 +65,7 @@ CREATE TABLE deceased_cases (
   type TEXT NOT NULL CHECK (type IN ('Normal', 'VIP')) DEFAULT 'Normal',
   status TEXT NOT NULL CHECK (status IN ('IN_CUSTODY', 'DISCHARGED', 'CANCELLED', 'ARCHIVED')) DEFAULT 'IN_CUSTODY',
   discharge_date DATE,
-  storage_days INTEGER GENERATED ALWAYS AS (
-    CASE 
-      WHEN discharge_date IS NOT NULL THEN GREATEST(0, (discharge_date - admission_date)::INTEGER)
-      ELSE GREATEST(0, (CURRENT_DATE - admission_date)::INTEGER)
-    END
-  ) STORED,
+  -- storage_days will be a computed column (function) to allow dynamic calculation
   relative_name TEXT NOT NULL,
   relative_contact TEXT NOT NULL,
   relative_contact_secondary TEXT,
@@ -219,6 +214,18 @@ CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
 -- FUNCTIONS
 -- ============================================================================
 
+-- Function for computed column storage_days
+CREATE OR REPLACE FUNCTION storage_days(deceased_cases_row deceased_cases)
+RETURNS INTEGER AS $$
+BEGIN
+  IF deceased_cases_row.discharge_date IS NOT NULL THEN
+    RETURN GREATEST(0, (deceased_cases_row.discharge_date - deceased_cases_row.admission_date)::INTEGER);
+  ELSE
+    RETURN GREATEST(0, (CURRENT_DATE - deceased_cases_row.admission_date)::INTEGER);
+  END IF;
+END;
+$$ LANGUAGE plpgsql STABLE;
+
 -- Function to check if user is super admin
 CREATE OR REPLACE FUNCTION auth_is_super_admin()
 RETURNS BOOLEAN AS $$
@@ -365,30 +372,7 @@ CREATE TRIGGER update_deceased_cases_updated_at BEFORE UPDATE ON deceased_cases
 CREATE TRIGGER update_settings_updated_at BEFORE UPDATE ON settings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Auto-update case financials when charges change
-CREATE TRIGGER update_case_financials_on_charge_change
-  AFTER INSERT OR UPDATE OR DELETE ON case_charges
-  FOR EACH ROW EXECUTE FUNCTION update_case_financials(
-    CASE 
-      WHEN TG_OP = 'DELETE' THEN OLD.case_id
-      ELSE NEW.case_id
-    END
-  );
-
--- Auto-update case financials when payments change
-CREATE TRIGGER update_case_financials_on_payment_change
-  AFTER INSERT OR UPDATE OR DELETE ON payments
-  FOR EACH ROW EXECUTE FUNCTION update_case_financials(
-    CASE 
-      WHEN TG_OP = 'DELETE' THEN OLD.case_id
-      ELSE NEW.case_id
-    END
-  );
-
--- Fix the trigger functions (they need to call the function, not be it)
-DROP TRIGGER IF EXISTS update_case_financials_on_charge_change ON case_charges;
-DROP TRIGGER IF EXISTS update_case_financials_on_payment_change ON payments;
-
+-- Wrapper function to handle TG_OP logic for financials update
 CREATE OR REPLACE FUNCTION trigger_update_case_financials()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -398,6 +382,9 @@ BEGIN
   RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS update_case_financials_on_charge_change ON case_charges;
+DROP TRIGGER IF EXISTS update_case_financials_on_payment_change ON payments;
 
 CREATE TRIGGER update_case_financials_on_charge_change
   AFTER INSERT OR UPDATE OR DELETE ON case_charges

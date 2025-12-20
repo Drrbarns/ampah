@@ -11,24 +11,20 @@ VALUES
   (gen_random_uuid(), 'Branch 2 - Kumasi', 'ADM-002', '456 Oak Avenue, Kumasi', '+233-24-234-5678', true)
 ON CONFLICT (code) DO NOTHING;
 
--- Note: To create a super admin:
--- 1. Create user via Supabase Auth (email/password or magic link)
--- 2. Get the user ID from auth.users
--- 3. Insert into profiles with role='super_admin':
---
--- INSERT INTO profiles (id, full_name, phone, role, is_active)
--- VALUES (
---   'USER_UUID_HERE', -- Replace with actual auth.users.id
---   'Super Admin',
---   '+233-24-000-0000',
---   'super_admin',
---   true
--- );
---
--- 4. Assign super admin to all branches:
---
--- INSERT INTO user_branch_assignments (user_id, branch_id, is_primary)
--- SELECT 'USER_UUID_HERE', id, true FROM branches;
+-- Create Super Admin Profile (Update UUID below with your actual Auth User ID)
+INSERT INTO profiles (id, full_name, role, is_active)
+VALUES (
+  '7a371977-e557-4ff4-89d4-eff951eb7a4d', -- Your provided UID
+  'Super Admin',
+  'super_admin',
+  true
+) ON CONFLICT (id) DO NOTHING;
+
+-- Assign Super Admin to ALL branches (optional but good for access)
+-- Note: Super Admin role already bypasses RLS for reading, but this helps for dashboard filtering logic
+INSERT INTO user_branch_assignments (user_id, branch_id, is_primary)
+SELECT '7a371977-e557-4ff4-89d4-eff951eb7a4d', id, false FROM branches
+ON CONFLICT (user_id, branch_id) DO NOTHING;
 
 -- Example services for each branch (update branch IDs after creating branches)
 DO $$
