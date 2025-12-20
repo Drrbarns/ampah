@@ -1,36 +1,43 @@
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from "@/components/ui/avatar"
+import { formatCurrency } from "@/lib/utils"
 
-export function RecentSales() {
+interface RecentSalesProps {
+    sales: {
+        id: string
+        amount: number
+        profiles: {
+            full_name: string
+            email?: string
+        } | null
+        deceased_cases: {
+            name_of_deceased: string
+        } | null
+    }[]
+}
+
+export function RecentSales({ sales }: RecentSalesProps) {
   return (
     <div className="space-y-8">
-      {/* Placeholder content */}
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarFallback>OM</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Olivia Martin</p>
-          <p className="text-sm text-muted-foreground">
-            olivia.martin@email.com
-          </p>
+      {sales.map((sale) => (
+         <div className="flex items-center" key={sale.id}>
+            <Avatar className="h-9 w-9">
+            <AvatarFallback>{sale.profiles?.full_name?.substring(0,2).toUpperCase() || "CN"}</AvatarFallback>
+            </Avatar>
+            <div className="ml-4 space-y-1">
+            <p className="text-sm font-medium leading-none">{sale.profiles?.full_name || "Cashier"}</p>
+            <p className="text-sm text-muted-foreground">
+                Payment for {sale.deceased_cases?.name_of_deceased}
+            </p>
+            </div>
+            <div className="ml-auto font-medium">+{formatCurrency(sale.amount)}</div>
         </div>
-        <div className="ml-auto font-medium">+GH₵1,999.00</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarFallback>JL</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Jackson Lee</p>
-          <p className="text-sm text-muted-foreground">jackson.lee@email.com</p>
-        </div>
-        <div className="ml-auto font-medium">+GH₵39.00</div>
-      </div>
+      ))}
+      {sales.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center">No recent payments.</p>
+      )}
     </div>
   )
 }
-

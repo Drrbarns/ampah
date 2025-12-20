@@ -407,3 +407,4 @@ CREATE TRIGGER update_case_financials_on_payment_change
   AFTER INSERT OR UPDATE OR DELETE ON payments
   FOR EACH ROW EXECUTE FUNCTION trigger_update_case_financials();
 
+

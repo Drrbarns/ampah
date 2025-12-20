@@ -35,10 +35,29 @@ export default async function SuperAdminDashboardPage() {
 
   const { data: payments } = await supabase
     .from("payments")
-    .select("amount")
-    .gte("paid_on", startOfMonth.toISOString())
+    .select("amount, paid_on")
+    .gte("paid_on", new Date(new Date().getFullYear(), 0, 1).toISOString()) // This year
 
   const totalRevenue = payments?.reduce((sum, p) => sum + p.amount, 0) || 0
+
+  // Prepare chart data
+  const monthlyRevenue = new Array(12).fill(0)
+  payments?.forEach(p => {
+    const d = new Date(p.paid_on)
+    monthlyRevenue[d.getMonth()] += p.amount
+  })
+
+  const chartData = monthlyRevenue.map((total, index) => ({
+      name: new Date(0, index).toLocaleString('default', { month: 'short' }),
+      total
+  }))
+
+  // Recent Sales
+  const { data: recentSales } = await supabase
+    .from("payments")
+    .select("id, amount, profiles(full_name), deceased_cases(name_of_deceased)")
+    .order("paid_on", { ascending: false })
+    .limit(5)
 
   return (
     <div className="flex-1 space-y-4">
@@ -57,10 +76,11 @@ export default async function SuperAdminDashboardPage() {
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+             {/* ... KPI Cards ... */}
+             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Revenue (Month)
+                  Total Revenue (YTD)
                 </CardTitle>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +98,7 @@ export default async function SuperAdminDashboardPage() {
               <CardContent>
                 <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
                 <p className="text-xs text-muted-foreground">
-                  +20.1% from last month
+                  Current Year
                 </p>
               </CardContent>
             </Card>
@@ -158,26 +178,25 @@ export default async function SuperAdminDashboardPage() {
             </Card>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            {/* Charts would go here */}
-            {/* <Card className="col-span-4">
+            <Card className="col-span-4">
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
               <CardContent className="pl-2">
-                <Overview />
+                <Overview data={chartData} />
               </CardContent>
             </Card>
             <Card className="col-span-3">
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
+                <CardTitle>Recent Sales</CardTitle>
                 <CardDescription>
-                  Latest admissions and payments.
+                  Latest payments received across system.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RecentSales />
+                <RecentSales sales={(recentSales as any) || []} />
               </CardContent>
-            </Card> */}
+            </Card>
           </div>
         </TabsContent>
       </Tabs>

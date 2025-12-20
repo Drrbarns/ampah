@@ -406,3 +406,4 @@ CREATE POLICY "Branch admin can manage branch settings"
     AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('super_admin', 'branch_admin'))
   );
 
+

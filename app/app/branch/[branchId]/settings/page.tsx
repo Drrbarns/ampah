@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { ServiceDialog } from "./service-dialog"
+import { formatCurrency } from "@/lib/utils"
 
 export default async function SettingsPage({
   params,
@@ -26,20 +28,25 @@ export default async function SettingsPage({
 
       <div className="grid gap-4 md:grid-cols-2">
           <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>Service Catalog (Pricing)</CardTitle>
+                  <ServiceDialog branchId={branchId} />
               </CardHeader>
               <CardContent>
                   <div className="space-y-4">
                       {services?.map((service) => (
-                          <div key={service.id} className="grid grid-cols-3 gap-2 items-center border-b pb-2">
-                              <div className="font-medium">{service.name}</div>
+                          <div key={service.id} className="grid grid-cols-4 gap-2 items-center border-b pb-2">
+                              <div className="font-medium col-span-2">{service.name}</div>
                               <div className="text-sm text-muted-foreground">{service.pricing_model}</div>
-                              <div className="text-right font-mono">{service.unit_price}</div>
+                              <div className="text-right font-mono flex items-center justify-end gap-2">
+                                  {formatCurrency(service.unit_price)}
+                                  <ServiceDialog branchId={branchId} service={service} />
+                              </div>
                           </div>
                       ))}
-                      {/* Add/Edit form would go here */}
-                      <Button className="mt-4" variant="outline" disabled>Manage Services (Coming Soon)</Button>
+                      {(!services || services.length === 0) && (
+                          <div className="text-center text-muted-foreground py-4">No services configured.</div>
+                      )}
                   </div>
               </CardContent>
           </Card>
@@ -62,4 +69,5 @@ export default async function SettingsPage({
     </div>
   )
 }
+
 

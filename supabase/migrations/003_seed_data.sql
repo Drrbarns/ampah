@@ -101,3 +101,4 @@ VALUES
   (NULL, 'default_embalming_fee', '{"value": 500.00}')
 ON CONFLICT (branch_id, key) DO NOTHING;
 
+
