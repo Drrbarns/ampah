@@ -29,6 +29,11 @@ export default async function CaseDetailsPage({
     return <div>Case not found</div>
   }
 
+  // Calculate storage days
+  const admissionDate = new Date(caseDetails.admission_date)
+  const endDate = caseDetails.discharge_date ? new Date(caseDetails.discharge_date) : new Date()
+  const storageDays = Math.max(0, Math.floor((endDate.getTime() - admissionDate.getTime()) / (1000 * 60 * 60 * 24)))
+
   // Fetch Charges
   const { data: charges } = await supabase
     .from("case_charges")
@@ -171,7 +176,7 @@ export default async function CaseDetailsPage({
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">Storage Fee ({caseDetails.storage_days} days)</span>
+                        <span className="text-muted-foreground">Storage Fee ({storageDays} days)</span>
                         <span>{formatCurrency(caseDetails.storage_fee || 0)}</span>
                     </div>
                     <div className="flex justify-between">

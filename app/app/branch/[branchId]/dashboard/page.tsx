@@ -41,6 +41,21 @@ export default async function BranchDashboardPage({
     .eq('branch_id', branchId)
     .eq('status', 'IN_CUSTODY')
 
+  // Recent Activity
+  const { data: recentCases } = await supabase
+    .from('deceased_cases')
+    .select('id, tag_no, name_of_deceased, admission_date, status')
+    .eq('branch_id', branchId)
+    .order('created_at', { ascending: false })
+    .limit(5)
+
+  const { data: recentPayments } = await supabase
+    .from('payments')
+    .select('id, receipt_no, amount, paid_on, deceased_cases(name_of_deceased, tag_no)')
+    .eq('branch_id', branchId)
+    .order('paid_on', { ascending: false })
+    .limit(5)
+
   return (
     <div className="flex-1 space-y-4">
       <div className="flex items-center justify-between space-y-2">
@@ -135,7 +150,57 @@ export default async function BranchDashboardPage({
         </Card>
       </div>
       
-      {/* Add more charts here later */}
+      {/* Recent Activity */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>Recent Admissions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentCases?.map((c) => (
+                <Link key={c.id} href={`/app/branch/${branchId}/cases/${c.id}`}>
+                  <div className="flex items-center justify-between p-2 hover:bg-accent rounded-md cursor-pointer">
+                    <div>
+                      <div className="font-medium">{c.tag_no} - {c.name_of_deceased}</div>
+                      <div className="text-xs text-muted-foreground">{formatCurrency(0)} • {c.status}</div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">{c.admission_date}</div>
+                  </div>
+                </Link>
+              ))}
+              {(!recentCases || recentCases.length === 0) && (
+                <div className="text-center text-muted-foreground text-sm py-4">No recent admissions</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-3">
+          <CardHeader>
+            <CardTitle>Recent Payments</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentPayments?.map((p) => (
+                <div key={p.id} className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">{p.receipt_no}</div>
+                    <div className="text-xs text-muted-foreground">{p.deceased_cases?.tag_no}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-green-600">{formatCurrency(p.amount)}</div>
+                    <div className="text-xs text-muted-foreground">{formatCurrency(0)}</div>
+                  </div>
+                </div>
+              ))}
+              {(!recentPayments || recentPayments.length === 0) && (
+                <div className="text-center text-muted-foreground text-sm py-4">No recent payments</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

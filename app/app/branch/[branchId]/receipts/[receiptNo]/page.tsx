@@ -38,6 +38,14 @@ export default async function ReceiptPage({
   const type = payment ? "PAYMENT RECEIPT" : "DISCHARGE CLEARANCE"
   const date = payment ? payment.paid_on : dischargeCase.discharge_date
 
+  // Calculate storage days for discharge
+  let storageDays = 0
+  if (dischargeCase) {
+    const admissionDate = new Date(dischargeCase.admission_date)
+    const dischargeDate = new Date(dischargeCase.discharge_date)
+    storageDays = Math.max(0, Math.floor((dischargeDate.getTime() - admissionDate.getTime()) / (1000 * 60 * 60 * 24)))
+  }
+
   return (
     <div className="p-8 max-w-[800px] mx-auto font-serif text-black bg-white min-h-screen">
       <style>{`
@@ -116,7 +124,7 @@ export default async function ReceiptPage({
                     </tr>
                      <tr>
                         <td className="border p-2">Total Storage Days</td>
-                        <td className="border p-2 text-right">{dischargeCase.storage_days}</td>
+                        <td className="border p-2 text-right">{storageDays}</td>
                     </tr>
                     <tr className="font-bold bg-gray-50">
                         <td className="border p-2">Total Billed</td>

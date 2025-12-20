@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
+import { createCaseAction, updateCaseAction } from "@/app/actions/case-actions"
 
 const caseFormSchema = z.object({
   tag_no: z.string().min(1, "Tag number is required"),
@@ -80,49 +81,37 @@ export function CaseForm({ branchId, initialData, isEdit = false }: CaseFormProp
   async function onSubmit(data: CaseFormValues) {
     setLoading(true)
     try {
+      const formData = new FormData()
+      formData.append("branch_id", branchId)
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value?.toString() || "")
+      })
+
       if (isEdit && initialData?.id) {
-          // Update Mode
-          const { error } = await supabase
-            .from("deceased_cases")
-            .update({
-                ...data,
-                // Ensure branch_id is not changed or is valid
-            })
-            .eq("id", initialData.id)
-            .eq("branch_id", branchId) // Security check
+        // Update Mode
+        const res = await updateCaseAction(initialData.id, branchId, formData)
+        
+        if (res.error) throw new Error(res.error)
 
-          if (error) throw error
-
-          toast({
-            title: "Success",
-            description: "Case updated successfully.",
-          })
+        toast({
+          title: "Success",
+          description: "Case updated successfully.",
+        })
+        router.push(`/app/branch/${branchId}/cases/${initialData.id}`)
       } else {
-          // Create Mode
-          const { data: newCase, error } = await supabase
-            .from("deceased_cases")
-            .insert({
-              branch_id: branchId,
-              ...data,
-              status: "IN_CUSTODY",
-            })
-            .select()
-            .single()
+        // Create Mode
+        const res = await createCaseAction(formData)
+        
+        if (res.error) throw new Error(res.error)
 
-          if (error) {
-            if (error.code === '23505') {
-                throw new Error("Tag number already exists.")
-            }
-            throw error
-          }
-          
-          router.push(`/app/branch/${branchId}/cases/${newCase.id}`)
+        toast({
+          title: "Success",
+          description: "Case created successfully with initial charges.",
+        })
+        router.push(`/app/branch/${branchId}/cases/${res.caseId}`)
       }
 
       router.refresh()
-      if (isEdit) {
-          router.push(`/app/branch/${branchId}/cases/${initialData.id}`)
-      }
     } catch (error: any) {
       toast({
         variant: "destructive",
