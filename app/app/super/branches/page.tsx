@@ -1,46 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DataTable } from "@/components/ui/data-table"
-import { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { CreateBranchDialog } from "./branch-dialog"
-
-type Branch = {
-    id: string
-    name: string
-    code: string
-    address: string | null
-    phone: string | null
-    is_active: boolean
-}
-
-const columns: ColumnDef<Branch>[] = [
-  {
-    accessorKey: "code",
-    header: "Code",
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "address",
-    header: "Address",
-  },
-  {
-    accessorKey: "phone",
-    header: "Phone",
-  },
-  {
-    accessorKey: "is_active",
-    header: "Status",
-    cell: ({ row }) => (
-        <Badge variant={row.getValue("is_active") ? "default" : "secondary"}>
-            {row.getValue("is_active") ? "Active" : "Inactive"}
-        </Badge>
-    )
-  },
-]
+import { columns } from "./columns"
 
 export default async function BranchesPage() {
   const supabase = await createClient()
