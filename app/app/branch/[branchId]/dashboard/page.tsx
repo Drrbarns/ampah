@@ -20,8 +20,9 @@ export default async function BranchDashboardPage({
     .select('total_bill, balance, storage_fee')
     .eq('branch_id', branchId)
 
-  const totalRegistrationAmount = branchFinancials?.reduce((sum, c) => sum + (c.total_bill || 0), 0) || 0
-  const totalStorageAmount = branchFinancials?.reduce((sum, c) => sum + (c.storage_fee || 0), 0) || 0
+  const financialsData = (branchFinancials || []) as any[]
+  const totalRegistrationAmount = financialsData.reduce((sum: number, c: any) => sum + (c.total_bill || 0), 0)
+  const totalStorageAmount = financialsData.reduce((sum: number, c: any) => sum + (c.storage_fee || 0), 0)
   
   // 2. Counts
   const { count: totalAdmissions } = await supabase
@@ -55,6 +56,9 @@ export default async function BranchDashboardPage({
     .eq('branch_id', branchId)
     .order('paid_on', { ascending: false })
     .limit(5)
+
+  const recentCasesData = (recentCases || []) as any[]
+  const recentPaymentsData = (recentPayments || []) as any[]
 
   return (
     <div className="flex-1 space-y-4">
@@ -158,7 +162,7 @@ export default async function BranchDashboardPage({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentCases?.map((c) => (
+              {recentCasesData.map((c: any) => (
                 <Link key={c.id} href={`/app/branch/${branchId}/cases/${c.id}`}>
                   <div className="flex items-center justify-between p-2 hover:bg-accent rounded-md cursor-pointer">
                     <div>
@@ -169,7 +173,7 @@ export default async function BranchDashboardPage({
                   </div>
                 </Link>
               ))}
-              {(!recentCases || recentCases.length === 0) && (
+              {recentCasesData.length === 0 && (
                 <div className="text-center text-muted-foreground text-sm py-4">No recent admissions</div>
               )}
             </div>
@@ -182,7 +186,7 @@ export default async function BranchDashboardPage({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentPayments?.map((p) => (
+              {recentPaymentsData.map((p: any) => (
                 <div key={p.id} className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">{p.receipt_no}</div>
@@ -194,7 +198,7 @@ export default async function BranchDashboardPage({
                   </div>
                 </div>
               ))}
-              {(!recentPayments || recentPayments.length === 0) && (
+              {recentPaymentsData.length === 0 && (
                 <div className="text-center text-muted-foreground text-sm py-4">No recent payments</div>
               )}
             </div>

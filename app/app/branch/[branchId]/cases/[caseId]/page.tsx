@@ -30,8 +30,9 @@ export default async function CaseDetailsPage({
   }
 
   // Calculate storage days
-  const admissionDate = new Date(caseDetails.admission_date)
-  const endDate = caseDetails.discharge_date ? new Date(caseDetails.discharge_date) : new Date()
+  const caseData = caseDetails as any
+  const admissionDate = new Date(caseData.admission_date)
+  const endDate = caseData.discharge_date ? new Date(caseData.discharge_date) : new Date()
   const storageDays = Math.max(0, Math.floor((endDate.getTime() - admissionDate.getTime()) / (1000 * 60 * 60 * 24)))
 
   // Fetch Charges
@@ -41,12 +42,16 @@ export default async function CaseDetailsPage({
     .eq("case_id", caseId)
     .order("created_at", { ascending: true })
 
+  const chargesData = (charges || []) as any[]
+
   // Fetch Payments
   const { data: payments } = await supabase
     .from("payments")
     .select("*")
     .eq("case_id", caseId)
     .order("paid_on", { ascending: true })
+
+  const paymentsData = (payments || []) as any[]
 
   return (
     <div className="flex-1 space-y-4">
@@ -57,9 +62,9 @@ export default async function CaseDetailsPage({
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
             </Link>
-            <h2 className="text-3xl font-bold tracking-tight">Case: {caseDetails.tag_no}</h2>
-            <Badge variant={caseDetails.status === "IN_CUSTODY" ? "default" : "secondary"}>
-                {caseDetails.status}
+            <h2 className="text-3xl font-bold tracking-tight">Case: {caseData.tag_no}</h2>
+            <Badge variant={caseData.status === "IN_CUSTODY" ? "default" : "secondary"}>
+                {caseData.status}
             </Badge>
         </div>
         <div className="flex items-center space-x-2">
@@ -75,7 +80,7 @@ export default async function CaseDetailsPage({
                 </Button>
             </Link>
              <Link href={`/app/branch/${branchId}/cases/${caseId}/discharge`}>
-                <Button variant="default" disabled={caseDetails.status !== "IN_CUSTODY"}>
+                <Button variant="default" disabled={caseData.status !== "IN_CUSTODY"}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Discharge
                 </Button>
@@ -93,27 +98,27 @@ export default async function CaseDetailsPage({
                 <CardContent className="grid gap-4 md:grid-cols-2">
                     <div>
                         <div className="text-sm font-medium text-muted-foreground">Name</div>
-                        <div className="text-lg">{caseDetails.name_of_deceased}</div>
+                        <div className="text-lg">{caseData.name_of_deceased}</div>
                     </div>
                     <div>
                         <div className="text-sm font-medium text-muted-foreground">Gender</div>
-                        <div>{caseDetails.gender}</div>
+                        <div>{caseData.gender}</div>
                     </div>
                     <div>
                         <div className="text-sm font-medium text-muted-foreground">Age</div>
-                        <div>{caseDetails.age}</div>
+                        <div>{caseData.age}</div>
                     </div>
                      <div>
                         <div className="text-sm font-medium text-muted-foreground">Type</div>
-                        <div>{caseDetails.type}</div>
+                        <div>{caseData.type}</div>
                     </div>
                     <div>
                         <div className="text-sm font-medium text-muted-foreground">Place/Town</div>
-                        <div>{caseDetails.place || '-'}</div>
+                        <div>{caseData.place || '-'}</div>
                     </div>
                      <div>
                         <div className="text-sm font-medium text-muted-foreground">Admission Date</div>
-                        <div>{formatDate(caseDetails.admission_date)} {caseDetails.admission_time}</div>
+                        <div>{formatDate(caseData.admission_date)} {caseData.admission_time}</div>
                     </div>
                 </CardContent>
             </Card>
@@ -125,16 +130,16 @@ export default async function CaseDetailsPage({
                 <CardContent className="grid gap-4 md:grid-cols-2">
                     <div>
                         <div className="text-sm font-medium text-muted-foreground">Name</div>
-                        <div>{caseDetails.relative_name}</div>
+                        <div>{caseData.relative_name}</div>
                     </div>
                     <div>
                         <div className="text-sm font-medium text-muted-foreground">Contact</div>
-                        <div>{caseDetails.relative_contact}</div>
+                        <div>{caseData.relative_contact}</div>
                     </div>
-                    {caseDetails.relative_contact_secondary && (
+                    {caseData.relative_contact_secondary && (
                         <div className="col-span-2">
                              <div className="text-sm font-medium text-muted-foreground">Secondary Contact</div>
-                            <div>{caseDetails.relative_contact_secondary}</div>
+                            <div>{caseData.relative_contact_secondary}</div>
                         </div>
                     )}
                 </CardContent>
@@ -147,7 +152,7 @@ export default async function CaseDetailsPage({
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        {charges?.map((charge) => (
+                        {chargesData.map((charge) => (
                             <div key={charge.id} className="flex items-center justify-between border-b pb-2 last:border-0 group">
                                 <div>
                                     <div className="font-medium">{charge.description}</div>
@@ -161,7 +166,7 @@ export default async function CaseDetailsPage({
                         ))}
                          <div className="flex items-center justify-between pt-4">
                             <div className="font-bold">Total Bill</div>
-                            <div className="font-bold">{formatCurrency(caseDetails.total_bill || 0)}</div>
+                            <div className="font-bold">{formatCurrency(caseData.total_bill || 0)}</div>
                         </div>
                     </div>
                 </CardContent>
@@ -177,29 +182,29 @@ export default async function CaseDetailsPage({
                 <CardContent className="space-y-4">
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Storage Fee ({storageDays} days)</span>
-                        <span>{formatCurrency(caseDetails.storage_fee || 0)}</span>
+                        <span>{formatCurrency(caseData.storage_fee || 0)}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Embalming Fee</span>
-                        <span>{formatCurrency(caseDetails.embalming_fee || 0)}</span>
+                        <span>{formatCurrency(caseData.embalming_fee || 0)}</span>
                     </div>
                      <div className="flex justify-between">
                         <span className="text-muted-foreground">Coldroom Fee</span>
-                        <span>{formatCurrency(caseDetails.coldroom_fee || 0)}</span>
+                        <span>{formatCurrency(caseData.coldroom_fee || 0)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-bold text-lg">
                         <span>Total Bill</span>
-                        <span>{formatCurrency(caseDetails.total_bill || 0)}</span>
+                        <span>{formatCurrency(caseData.total_bill || 0)}</span>
                     </div>
                     <div className="flex justify-between text-green-600">
                         <span>Total Paid</span>
-                        <span>{formatCurrency(caseDetails.total_paid || 0)}</span>
+                        <span>{formatCurrency(caseData.total_paid || 0)}</span>
                     </div>
                      <Separator />
                      <div className="flex justify-between font-bold text-red-600 text-xl">
                         <span>Balance</span>
-                        <span>{formatCurrency(caseDetails.balance || 0)}</span>
+                        <span>{formatCurrency(caseData.balance || 0)}</span>
                     </div>
                 </CardContent>
             </Card>
@@ -210,7 +215,7 @@ export default async function CaseDetailsPage({
                 </CardHeader>
                 <CardContent>
                      <div className="space-y-4">
-                        {payments?.map((payment) => (
+                        {paymentsData.map((payment) => (
                             <div key={payment.id} className="flex items-center justify-between border-b pb-2 last:border-0">
                                 <div>
                                     <div className="font-medium">{payment.receipt_no}</div>

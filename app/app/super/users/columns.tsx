@@ -46,3 +46,5 @@ export const columns: ColumnDef<Profile>[] = [
   }
 ]
 
+
+

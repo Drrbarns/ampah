@@ -16,10 +16,9 @@ export async function addChargeAction(formData: FormData) {
 
   const supabase = await createClient()
 
-  // Verify access (handled by RLS mostly, but double check)
-
   const { error } = await supabase
     .from("case_charges")
+    // @ts-ignore - Supabase type inference issue
     .insert({
         case_id: caseId,
         branch_id: branchId,
@@ -53,4 +52,5 @@ export async function deleteChargeAction(chargeId: string, caseId: string, branc
     revalidatePath(`/app/branch/${branchId}/cases/${caseId}`)
     return { success: true }
 }
+
 

@@ -19,6 +19,7 @@ export default async function BranchLayout({
   }
 
   // Verify access to this branch
+  // @ts-ignore - Supabase type inference issue
   const { data: hasAccess } = await supabase.rpc('auth_user_has_branch', {
     branch_id_param: branchId
   })

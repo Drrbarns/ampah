@@ -22,10 +22,11 @@ export default async function EditCasePage({
 
   // Transform to form values format if necessary
   // CaseForm expects specific types, checking compatibility
+  const caseData = caseDetails as any
   const initialData = {
-      ...caseDetails,
+      ...caseData,
       // Ensure time format is HH:MM
-      admission_time: caseDetails.admission_time.slice(0, 5)
+      admission_time: caseData.admission_time?.slice(0, 5) || ""
   }
 
   return (
@@ -39,4 +40,5 @@ export default async function EditCasePage({
     </div>
   )
 }
+
 

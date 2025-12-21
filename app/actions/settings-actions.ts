@@ -18,6 +18,7 @@ export async function upsertServiceAction(data: ServiceInsert) {
   
   const { error } = await supabase
     .from("services_catalog")
+    // @ts-ignore - Supabase type inference issue
     .upsert(data)
 
   if (error) {
@@ -42,4 +43,6 @@ export async function deleteServiceAction(serviceId: string, branchId: string) {
     revalidatePath(`/app/branch/${branchId}/settings`)
     return { success: true }
 }
+
+
 

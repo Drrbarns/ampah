@@ -17,11 +17,12 @@ export async function createBranchAction(formData: FormData) {
 
   const { error } = await supabase
     .from("branches")
+    // @ts-ignore - Supabase type inference issue
     .insert({
         name,
         code,
-        address,
-        phone,
+        address: address || null,
+        phone: phone || null,
         is_active: true
     })
 
@@ -48,7 +49,8 @@ export async function updateBranchAction(branchId: string, formData: FormData) {
     
     const { error } = await supabase
         .from("branches")
-        .update({ name, code, address, phone })
+        // @ts-ignore - Supabase type inference issue
+        .update({ name, code, address: address || null, phone: phone || null })
         .eq("id", branchId)
 
     if (error) return { error: error.message }
@@ -60,17 +62,13 @@ export async function updateBranchAction(branchId: string, formData: FormData) {
 export async function deleteBranchAction(branchId: string) {
     const supabase = await createClient()
     
-    // Check for dependencies (users, cases) before deleting?
-    // FK constraints usually block delete if RESTRICT is set.
-    // Assuming RESTRICT on cases.
-    
     const { error } = await supabase
         .from("branches")
         .delete()
         .eq("id", branchId)
 
     if (error) {
-        if (error.code === '23503') { // Foreign Key Violation
+        if (error.code === '23503') {
             return { error: "Cannot delete branch with active cases or assigned users." }
         }
         return { error: error.message }
@@ -79,3 +77,4 @@ export async function deleteBranchAction(branchId: string) {
     revalidatePath("/app/super/branches")
     return { success: true }
 }
+
