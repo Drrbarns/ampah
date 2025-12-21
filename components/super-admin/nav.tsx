@@ -49,15 +49,15 @@ export function SuperAdminNav({
         Branches
       </Link>
       <Link
-        href="/app/super/users"
+        href="/app/super/hr"
         className={cn(
           "text-sm font-medium transition-colors hover:text-primary",
-          pathname.startsWith("/app/super/users")
+          pathname.startsWith("/app/super/hr")
             ? "text-primary"
             : "text-muted-foreground"
         )}
       >
-        Users
+        HR Management
       </Link>
       <Link
         href="/app/super/reports"
